@@ -8,7 +8,15 @@ spring:
       port: 27017
       database: bankAccount
   kafka:
+    # Single topic for every BankAccount event: Kafka only guarantees ordering within a partition,
+    # so all events of the aggregate must travel through the same topic (and the same partition).
+    topic: BankAccountEvents
     producer:
       bootstrap-servers: localhost:29092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        # Idempotent producer: retries can neither duplicate nor reorder events in the partition
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1

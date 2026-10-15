@@ -13,6 +13,8 @@ public class AccountEventProducer implements EventProducer {
 
     @Override
     public void produce(String topic, BaseEvent event) {
-        this.kafkaTemplate.send(topic, event);
+        // The aggregate id is used as the record key so every event of the same account
+        // lands in the same partition and keeps its order even if the topic has several partitions
+        this.kafkaTemplate.send(topic, event.getId(), event);
     }
 }
