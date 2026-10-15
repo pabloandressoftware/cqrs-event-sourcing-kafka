@@ -15,6 +15,8 @@
 	<description>Bank Account Command API Project</description>
 	<properties>
 		<java.version>16</java.version>
+		<!-- Lombok 1.18.20 (Boot 2.4.5 default) does not run on JDK 17+ -->
+		<lombok.version>1.18.34</lombok.version>
 	</properties>
 	<dependencies>
 		<dependency>
