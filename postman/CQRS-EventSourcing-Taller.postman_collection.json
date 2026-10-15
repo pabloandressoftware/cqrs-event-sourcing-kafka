@@ -1,0 +1,603 @@
+{
+  "info": {
+    "_postman_id": "1f667d0c-ab57-4758-8b3d-581383996fde",
+    "name": "CQRS Event Sourcing - Taller (Pablo Guzman A00399523)",
+    "description": "Pruebas de todos los endpoints de jrquinte/cqrs-event-sourcing-kafka. Ejecutar en orden: el id de la cuenta se guarda automáticamente en {{accountId}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. OpenAccountController",
+      "item": [
+        {
+          "name": "01 Abrir cuenta (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{cmdUrl}}/openBankAccount",
+              "host": [
+                "{{cmdUrl}}"
+              ],
+              "path": [
+                "openBankAccount"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountHolder\": \"Pablo Guzman\",\n  \"accountType\": \"SAVINGS\",\n  \"openingBalance\": 1000.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Devuelve el id de la cuenta\", function () { pm.expect(pm.response.json().id).to.be.a('string'); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"accountId\", pm.response.json().id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 Abrir segunda cuenta (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{cmdUrl}}/openBankAccount",
+              "host": [
+                "{{cmdUrl}}"
+              ],
+              "path": [
+                "openBankAccount"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountHolder\": \"Laura Gomez\",\n  \"accountType\": \"CURRENT\",\n  \"openingBalance\": 250.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"accountId2\", pm.response.json().id); }"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. DepositFundsController",
+      "item": [
+        {
+          "name": "03 Depositar 500 (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{cmdUrl}}/depositFunds/{{accountId}}",
+              "host": [
+                "{{cmdUrl}}"
+              ],
+              "path": [
+                "depositFunds",
+                "{{accountId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 Depositar monto negativo (PUT) - error",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{cmdUrl}}/depositFunds/{{accountId}}",
+              "host": [
+                "{{cmdUrl}}"
+              ],
+              "path": [
+                "depositFunds",
+                "{{accountId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": -50.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. WithdrawFundsController",
+      "item": [
+        {
+          "name": "05 Retirar 200 (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{cmdUrl}}/withdrawFunds/{{accountId}}",
+              "host": [
+                "{{cmdUrl}}"
+              ],
+              "path": [
+                "withdrawFunds",
+                "{{accountId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 200.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 Retirar más del saldo (PUT) - error",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{cmdUrl}}/withdrawFunds/{{accountId}}",
+              "host": [
+                "{{cmdUrl}}"
+              ],
+              "path": [
+                "withdrawFunds",
+                "{{accountId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 99999.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. AccountLookupController",
+      "item": [
+        {
+          "name": "07 a. Obtener todas las cuentas (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{queryUrl}}/",
+              "host": [
+                "{{queryUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 b. Buscar cuenta por ID (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{queryUrl}}/byId/{{accountId}}",
+              "host": [
+                "{{queryUrl}}"
+              ],
+              "path": [
+                "byId",
+                "{{accountId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Saldo = 1000 + 500 - 200 = 1300\", function () { pm.expect(pm.response.json().accounts[0].balance).to.eql(1300); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 c. Buscar cuenta por titular (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{queryUrl}}/byHolder/Pablo Guzman",
+              "host": [
+                "{{queryUrl}}"
+              ],
+              "path": [
+                "byHolder",
+                "Pablo Guzman"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 d. Cuentas con balance GREATER_THAN 1000 (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{queryUrl}}/withBalance/GREATER_THAN/1000",
+              "host": [
+                "{{queryUrl}}"
+              ],
+              "path": [
+                "withBalance",
+                "GREATER_THAN",
+                "1000"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11 d. Cuentas con balance LESS_THAN 1000 (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{queryUrl}}/withBalance/LESS_THAN/1000",
+              "host": [
+                "{{queryUrl}}"
+              ],
+              "path": [
+                "withBalance",
+                "LESS_THAN",
+                "1000"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. CloseAccountController",
+      "item": [
+        {
+          "name": "12 Cerrar cuenta (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{cmdUrl}}/closeBankAccount/{{accountId}}",
+              "host": [
+                "{{cmdUrl}}"
+              ],
+              "path": [
+                "closeBankAccount",
+                "{{accountId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 Buscar cuenta cerrada por ID (GET) - 204",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{queryUrl}}/byId/{{accountId}}",
+              "host": [
+                "{{queryUrl}}"
+              ],
+              "path": [
+                "byId",
+                "{{accountId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "14 Cerrar cuenta ya cerrada (DELETE) - error",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{cmdUrl}}/closeBankAccount/{{accountId}}",
+              "host": [
+                "{{cmdUrl}}"
+              ],
+              "path": [
+                "closeBankAccount",
+                "{{accountId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. RestoreReadDbController",
+      "item": [
+        {
+          "name": "15 Restaurar base de lectura (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{cmdUrl}}/restoreReadDb",
+              "host": [
+                "{{cmdUrl}}"
+              ],
+              "path": [
+                "restoreReadDb"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "16 Todas las cuentas después del restore (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{queryUrl}}/",
+              "host": [
+                "{{queryUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "cmdUrl",
+      "value": "http://localhost:5000/api/v1"
+    },
+    {
+      "key": "queryUrl",
+      "value": "http://localhost:5001/api/v1/bankAccountLookup"
+    },
+    {
+      "key": "accountId",
+      "value": ""
+    },
+    {
+      "key": "accountId2",
+      "value": ""
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Las consultas leen un read model eventualmente consistente: pequeña espera para que Kafka entregue el evento",
+          "if (pm.request.url.toString().includes('5001') || pm.request.url.toString().includes('queryUrl')) { setTimeout(function(){}, 1500); }"
+        ]
+      }
+    }
+  ]
+}
